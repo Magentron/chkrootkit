@@ -1,8 +1,8 @@
 #! /bin/sh
 # -*- Shell-script -*-
 
-# $Id: chkrootkit, v 0.49 2009/07/30
-CHKROOTKIT_VERSION='0.49'
+# $Id: chkrootkit, v 0.49a 2013/09/13
+CHKROOTKIT_VERSION='0.49a'
 
 # Authors: Nelson Murilo <nelson@pangeia.com.br> (main author) and
 #          Klaus Steding-Jessen <jessen@cert.br>
@@ -527,7 +527,8 @@ ${ROOTDIR}usr/include/syslogs.h"
 
       ## Suckit rootkit
       expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} HOME"
-      expertmode_output "cat ${ROOTDIR}proc/1/maps | ${egrep} init."
+      expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} FUCK"
+      #expertmode_output "cat ${ROOTDIR}proc/1/maps | ${egrep} init."
       expertmode_output "cat ${ROOTDIR}dev/.golf"
 
       ## Volc rootkit
@@ -981,7 +982,9 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    if [ -f ${ROOTDIR}sbin/init ]; then
       if [ "${QUIET}" != "t" ];then printn "Searching for Suckit rootkit... "; fi
       if [ ${SYSTEM} != "HP-UX" ] && ( ${strings} ${ROOTDIR}sbin/init | ${egrep} HOME  || \
-	      cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." ) >/dev/null 2>&1
+          ${strings} ${ROOTDIR}sbin/init | ${egrep} FUCK \
+	      #|| cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." \
+		  ) >/dev/null 2>&1
         then
         echo "Warning: ${ROOTDIR}sbin/init INFECTED"
       else
@@ -1126,25 +1129,6 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    fi
 
    ###
-   ### Suspect PHP files
-   ###
-   if [ "${QUIET}" != "t" ]; then
-      printn "Searching for suspect PHP files... "; fi
-      files="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -name '*.php' 2> /dev/null`"
-if [ `echo abc | head -n 1` = "abc" ]; then
-      fileshead="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -type f -exec head -n 1 {} \; | $egrep '#!.*php' 2> /dev/null`"
-else
-      fileshead="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -type f -exec head -1 {} \; | grep '#!.*php' 2> /dev/null`"
-fi
-   if [ "${files}" = "" -a "${fileshead}" = "" ]; then
-      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
-   else
-     echo
-     echo "${files}"
-     echo "${fileshead}"
-   fi
-
-   ###
    ### shell history anomalies
    ###
    if [ "${QUIET}" != "t" ]; then \
@@ -1209,7 +1193,7 @@ getCMD() {
    for i in ${ROOTDIR}${RUNNING} ${ROOTDIR}usr/sbin/${1} `loc ${1} ${1} $pth`
    do
       CMD="${i}"
-      if [ -r "${i}" ]
+      if [ -r "${i}" ] && [ "${i}" != "${ROOTDIR}" ];
         then
         return 0
       fi
@@ -1374,9 +1358,8 @@ chk_inetd () {
     STATUS=${NOT_INFECTED}
     getCMD 'inetd'
 
-    if [ ! -r ${CMD} -o ${CMD} = '/' ]
-    then
-       return ${NOT_TESTED}
+    if [ ${?} -ne 0 ]; then
+       return ${NOT_FOUND}
     fi
 
     if [ "${EXPERT}" = "t" ]; then
