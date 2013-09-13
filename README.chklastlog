@@ -1,0 +1,51 @@
+
+chklastlog - check lastlog-file for deleted information
+
+   Copyright (c) DFN-CERT, Univ. of Hamburg 1994
+
+   Univ. Hamburg, Dept. of Computer Science
+   DFN-CERT
+   Vogt-Koelln-Strasse 30
+   22527 Hamburg
+   Germany
+
+
+
+   This program is free software; you can distribute it and/or modify
+   it as long as you retain the DFN-CERT copyright statement.
+
+   It can be obtained via anonymous FTP from 
+   ftp://ftp.cert.dfn.de/pub/tools/admin/chklastlog/chklastlog.tar.Z
+
+   This program is distributed WITHOUT ANY WARRANTY; without the IMPLIED
+   WARRANTY of merchantability or fitness for a particular purpose.
+
+   This package contains:
+       README
+       MANIFEST
+       chklastlog.1
+       chklastlog.c
+       chklastlog.txt
+
+   To create chklastlog under SunOS 4.x, type:
+   % cc -o chklastlog chklastlog.c 
+
+
+   To run chklastlog you need read permission on the files /var/adm/wtmp
+   and /var/adm/lastlogin. Normally these files are world-readable and
+   no special privileges are required to run the checker.
+
+   The following is an example of the output of chklastlog.
+
+   Running chklastlog on a machine with deleted lastlog-entries, under csh(1):
+
+   % chklastlog
+   user ley deleted from lastlog!
+   % 
+
+   Running chklastlog on a machine with no deleted lastlog-entries, under csh(1):
+
+   % chklastlog
+   %
+
+

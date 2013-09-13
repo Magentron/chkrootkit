@@ -1,0 +1,50 @@
+
+chkwtmp - check wtmp-file for overwritten information
+
+   Copyright (c) DFN-CERT, Univ. of Hamburg 1994
+
+   Univ. Hamburg, Dept. of Computer Science
+   DFN-CERT
+   Vogt-Koelln-Strasse 30
+   22527 Hamburg
+   Germany
+
+
+
+   This program is free software; you can distribute it and/or modify
+   it as long as you retain the DFN-CERT copyright statement.
+
+   It can be obtained via anonymous FTP from 
+   ftp://ftp.cert.dfn.de/pub/tools/admin/chkwtmp/chkwtmp.tar.Z
+
+   This program is distributed WITHOUT ANY WARRANTY; without the IMPLIED
+   WARRANTY of merchantability or fitness for a particular purpose.
+
+   This package contains:
+       README
+       MANIFEST
+       chkwtmp.1
+       chkwtmp.c
+       chkwtmp.txt
+
+   To create chkwtmp under SunOS 4.x, type:
+   % cc -o chkwtmp chkwtmp.c 
+
+   To run chkwtmp you need read permission on the file /var/adm/wtmp.
+   Normally this file is world-readable and no special privileges are 
+   required to run the checker. 
+
+   The following is an example of the output of chkwtmp.
+
+   Running chkwtmp on a machine with deleted wtmp-entries, under csh(1):
+
+   % chkwtmp
+   1 deletion(s) between Thu Sep 29 08:23:57 1994 and Thu Sep 29 14:11:58 1994
+   % 
+
+   Running chkwtmp on a machine with no deleted wtmp-entries, under csh(1):
+
+   % chkwtmp
+   %
+
+

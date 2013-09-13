@@ -1,0 +1,360 @@
+                         chkrootkit V. 0.49
+
+          Nelson Murilo <nelson@pangeia.com.br> (main author)
+            Klaus Steding-Jessen <jessen@cert.br> (co-author)
+
+          This program locally checks for signs of a rootkit.
+         chkrootkit is available at: http://www.chkrootkit.org/
+
+
+                 No illegal activities are encouraged!
+         I'm not responsible for anything you may do with it.
+
+           This tool includes software developed by the
+           DFN-CERT, Univ. of Hamburg (chklastlog and chkwtmp),
+           and small portions of ifconfig developed by
+           Fred N. van Kempen, <waltje@uwalt.nl.mugnet.org>.
+
+
+ 1. What's chkrootkit?
+ ---------------------
+
+ chkrootkit is a tool to locally check for signs of a rootkit.  It
+ contains:
+
+ * chkrootkit: a shell script that checks system binaries for
+   rootkit modification.
+
+ * ifpromisc.c: checks if the network interface is in promiscuous
+   mode.
+
+ * chklastlog.c: checks for lastlog deletions.
+
+ * chkwtmp.c: checks for wtmp deletions.
+
+ * check_wtmpx.c: checks for wtmpx deletions.  (Solaris only)
+
+ * chkproc.c: checks for signs of LKM trojans.
+
+ * chkdirs.c: checks for signs of LKM trojans.
+
+ * strings.c: quick and dirty strings replacement.
+
+ * chkutmp.c: checks for utmp deletions.
+
+ chkwtmp and chklastlog *try* to check for deleted entries in the wtmp
+ and lastlog files, but it is *not* guaranteed that any modification
+ will be detected.
+
+ Aliens tries to find sniffer logs and rootkit config files.  It looks
+ for some default file locations -- so it is also not guaranteed it
+ will succeed in all cases.
+
+ chkproc checks if /proc entries are hidden from ps and the readdir
+ system call.  This could be the indication of a LKM trojan.  You can
+ also run this command with the -v option (verbose).
+
+
+ 2. Rootkits, Worms and LKMs detected
+ ------------------------------------
+
+ For an updated list of rootkits, worms and LKMs detected by
+ chkrootkit please visit: http://www.chkrootkit.org/
+
+
+ 3. Supported Systems
+ --------------------
+
+ chkrootkit has been tested on: Linux 2.0.x, 2.2.x, 2.4.x and 2.6.x,
+ FreeBSD 2.2.x, 3.x, 4.x and 5.x, OpenBSD 2.x, 3.x and 4.x., NetBSD
+ 1.6.x, Solaris 2.5.1, 2.6, 8.0 and 9.0, HP-UX 11, Tru64, BSDI and Mac
+ OS X.
+
+
+ 4. Package Contents
+ -------------------
+
+ README
+ README.chklastlog
+ README.chkwtmp
+ COPYRIGHT
+ chkrootkit.lsm
+
+ Makefile
+ chklastlog.c
+ chkproc.c
+ chkdirs.c
+ chkwtmp.c
+ check_wtmpx.c
+ ifpromisc.c
+ strings.c
+ chkutmp.c
+
+ chkrootkit
+
+
+ 5. Installation
+ ---------------
+
+ To compile the C programs type:
+
+ # make sense
+
+ After that it is ready to use and you can simply type:
+
+ # ./chkrootkit
+
+
+ 6. Usage
+ --------
+
+ chkrootkit must run as root.  The simplest way is:
+
+ # ./chkrootkit
+
+ This will perform all tests.  You can also specify only the tests you
+ want, as shown below:
+
+ Usage: ./chkrootkit [options] [testname ...]
+ Options:
+         -h                show this help and exit
+         -V                show version information and exit
+         -l                show available tests
+         -d                debug
+         -q                quiet mode
+         -x                expert mode
+         -r dir            use dir as the root directory
+         -p dir1:dir2:dirN path for the external commands used by chkrootkit
+         -n                skip NFS mounted dirs
+
+ Where testname stands for one or more from the following list:
+
+ aliens asp bindshell lkm rexedcs sniffer w55808 wted scalper slapper
+ z2 chkutmp amd basename biff chfn chsh cron crontab date du dirname
+ echo egrep env find fingerd gpm grep hdparm su ifconfig inetd
+ inetdconf identd init killall ldsopreload login ls lsof mail mingetty
+ netstat named passwd pidof pop2 pop3 ps pstree rpcinfo rlogind rshd
+ slogin sendmail sshd syslogd tar tcpd tcpdump top telnetd timed
+ traceroute vdir w write
+
+ For example, the following command checks for trojaned ps and ls
+ binaries and also checks if the network interface is in promiscuous
+ mode.
+
+   # ./chkrootkit ps ls sniffer
+
+ The `-q' option can be used to put chkrootkit in quiet mode -- in
+ this mode only output messages with `infected' status are shown.
+
+ With the `-x' option the user can examine suspicious strings in the
+ binary programs that may indicate a trojan -- all the analysis is
+ left to the user.
+
+ Lots of data can be seen with:
+
+   # ./chkrootkit -x | more
+
+ Pathnames inside system commands:
+
+   # ./chkrootkit -x | egrep '^/'
+
+ chkrootkit uses the following commands to make its tests: awk, cut,
+ egrep, find, head, id, ls, netstat, ps, strings, sed, uname.  It is
+ possible, with the `-p' option, to supply an alternate path to
+ chkrootkit so it won't use the system's (possibly) compromised
+ binaries to make its tests.
+
+ To use, for example, binaries in /cdrom/bin:
+
+   # ./chkrootkit -p /cdrom/bin
+
+ It is possible to add more paths with a `:'
+
+   # ./chkrootkit -p /cdrom/bin:/floppy/mybin
+
+ Sometimes is a good idea to mount the disk from a compromised machine
+ on a machine you trust.  Just mount the disk and specify a new
+ rootdir with the `-r' option.
+
+ For example, suppose the disk you want to check is mounted under
+ /mnt, then:
+
+   # ./chkrootkit -r /mnt
+
+
+ 7. Output Messages
+ ------------------
+
+ The following messages are printed by chkrootkit (except with the -x
+ and -q command options) during its tests:
+
+   "INFECTED": the test has identified a command probably modified by
+   a known rootkit;
+
+   "not infected": the test didn't find any known rootkit signature.
+
+   "not tested": the test was not performed -- this could happen in
+   the following situations:
+     a) the test is OS specific;
+     b) the test depends on an external program that is not available;
+     c) some specific command line options are given. (e.g. -r ).
+
+   "not found": the command to be tested is not available;
+
+   "Vulnerable but disabled": the command is infected but not in use.
+   (not running or commented in inetd.conf)
+
+
+ 8. A trojaned command has been found.  What should I do now?
+ ------------------------------------------------------------
+
+ Your biggest problem is that your machine has been compromised and
+ this bad guy has root privileges.
+
+ Maybe you can solve the problem by just replacing the trojaned
+ command -- the best way is to reinstall the machine from a safe media
+ and to follow your vendor's security recommendations.
+
+
+ 9. Reports and questions
+ ------------------------
+
+ Please send comments, questions and bug reports to
+ nelson@pangeia.com.br and jessen@cert.br.
+
+ A simple FAQ and Related information about rootkits and security can
+ be found at chkrootkit's homepage, http://www.chkrootkit.org.
+
+
+ 10. ACKNOWLEDGMENTS
+ -------------------
+
+ See the ACKNOWLEDGMENTS file.
+
+ 11. ChangeLog
+ -------------
+
+ 02/20/1997 - Initial release
+ 02/25/1997 - Version 0.4, formal testing.
+ 03/30/1997 - Version 0.5, suspect files routine added.
+ 06/11/1997 - Version 0.6, minor fixes and Debian compatibility.
+ 06/24/1997 - Version 0.7, FreeBSD compatibility fixed.
+ 08/07/1997 - Version 0.8, yet another FreeBSD compatibility and
+                           RedHat PAM fixed.
+ 04/02/1998 - Version 0.9, new r00tkits versions support.
+ 07/03/1998 - Version 0.10, another types of r00tkits supported.
+ 10/15/1998 - Version 0.11, bug found by Alberto Courrege Gomide fixed.
+ 11/30/1998 - Version 0.12, lrk4 support added.
+ 12/26/1998 - Version 0.13, minor fixes for Red Hat and glibc users.
+ 06/14/1999 - Version 0.14, Sun/Solaris initial support added.
+ 04/29/2000 - Version 0.15, lrk5 features added and minor fixes.
+ 07/09/2000 - Version 0.16, new r00tkits types support and contrib patches.
+ 09/16/2000 - Version 0.17, more contrib patches, rootkit types and
+                            Loadable Kernel Modules (LKM) trojan checking
+                            added.
+ 10/08/2000 - Version 0.18, new rookits types support and many bug fixes.
+ 12/24/2000 - Version 0.19, -r, -p, -l options added.  ARK support
+                            added.  Some bug fixes.
+ 01/18/2001 - Version 0.20, Ramen Worm and latest t0rnkit detection,
+                            temporay check for promisc mode disabled
+                            on Solaris boxes.
+ 01/19/2001 - Version 0.21, Corrects a bug in the Ramen Worm detection.
+ 01/26/2001 - Version 0.22, chklastlog core dump bug fixed, login and
+                            bindshell false positives fixed, cron test
+                            improvement.
+ 03/12/2001 - Version 0.23, lrk6, rh[67]-shaper, RSHA and Romanian
+                            rootkit detection.  Test for shell history
+                            file anomalies.  More ports added to the
+                            bindshell test.
+ 03/15/2001 - Version 0.23a fixes a bug found in the cron and
+                            bindshell tests.
+
+ 03/22/2001 - Version 0.30  lots of new tests added.  RK17 and Lion
+                            Worm detection.
+ 04/07/2001 - Version 0.31  new tests: gpm, rlogind, mgetty.  Adore
+                            Worm detection.  Some bug fixes.
+ 05/07/2001 - Version 0.32  t0rn v8, LPD Worm, kenny-rk and Adore LKM
+                            detection. Some Solaris bug fixes.
+ 06/02/2001 - Version 0.33  new tests added.  ShitC, Omega and Wormkit
+                            Worm detection.  dsc-rootkit detection.
+                            Some bug fixes.
+ 09/19/2001 - Version 0.34  new tests added.  check_wtmpx.c added.
+                            Ducoci rootkit and x.c Worm detection.
+                            `-q' option added.
+ 01/17/2002 - Version 0.35  tests added: lsof and ldsopreload.
+                            strings.c added.  Ports added to the
+                            bindshell test.  RST.b, duarawkz, knark
+                            LKM, Monkit, Hidrootkit, Bobkit, Pizdakit,
+                            t0rn v8.0 (variant) detection.
+ 06/15/2002 - Version 0.36  test added: w.  chkproc.c additions.
+                            Showtee, Optickit, T.R.K, MithRa's
+                            Rootkit, George and SucKIT detection.
+ 09/16/2002 - Version 0.37  tests added: scalper and slapper.
+                            Scalper Worm, Slapper Worm, OpenBSD rk
+                            v1, Illogic and SK rootkit detection.
+                            chklastlog.c and chkproc.c improvements.
+                            Small chkrootkit bug fix.
+ 12/20/2002 - Version 0.38  chkdirs.c added.  chkproc.c improvements.
+                            slapper B, sebek LKM, LOC, Romanian
+                            rootkit detection.  new test added: trojan
+                            tcpdump.  Minor bug fixes in the
+                            chkrootkit script.
+ 01/30/2003 - Version 0.39  chkdirs.c and chkproc.c fixes.  bug fixes
+                            in the chkrootkit script.  (more) Slapper
+                            variants detection.
+ 04/03/2003 - Version 0.40  chkproc.c fixes.  Tru64 support. small
+                            corrections in chkrootkit.  New test
+                            added: init.  New rootkits detected: shv4,
+                            Aquatica, ZK.
+ 06/20/2003 - Version 0.41  chkproc.c fixes.  New test added: vdir.
+                            New worms detected: 55808.A and TC2. New
+                            rootkits detected: Volc, Gold2, Anonoying,
+                            Suckit (improved), ZK (improved).  Minor
+                            corrections.
+ 09/12/2003 - Version 0.42  BSDI support for chkdirs.c.  chkproc.c
+                            fix.  New rootkit detected: ShKit.
+                            ifpromisc test fixed for Linux 2.4.x
+                            kernels. corrections for the -r option.
+                            FreeBSD 5.x support.  HPUX correction.
+                            Extra "\n" removed from chklastlog.c
+                            output.
+ 09/18/2003 - Version 0.42a Bug fix release.
+ 09/20/2003 - Version 0.42b Bug fix release.
+ 12/27/2003 - Version 0.43  C++ comments removed from chkproc.c.  New
+                            rootkits detected: AjaKit and zaRwT.  New
+                            CGI backdoors detected.  ifpromisc.c:
+                            better detection of promisc mode on newer
+                            Linux kernels.  New command line option
+                            (-n) to skip NFS mounted dirs. Minor bug
+                            corrections.
+ 09/01/2004 - Version 0.44  chkwtmp.c: del counter fixed. chkproc.c:
+                            better support for Linux threads.  New
+                            rootkit detected: Madalin.  Lots of minor
+                            bug fixes.
+ 02/22/2005 - Version 0.45  chkproc.c: better support for Linux
+                            threads.  New rootkit detected: Fu,
+                            Kenga3, ESRK.  New test: chkutmp.  -n
+                            option improvement.  Minor bug fixes.
+ 10/26/2005 - Version 0.46  chkproc.c: more fixes to better support
+                            Linux threads. chkutmp.c: improved
+                            execution speed.  chkwtmp.c: segfault
+                            fixed.  New rootkit detected: rootedoor.
+                            Mac OS X support added.  Minor bug fixes.
+ 10/28/2005 - Version 0.46a chkproc.c: bug fix for FreeBSD: chkproc
+                            was sending a SIGXFSZ (kill -25) to init,
+                            causing a reboot.
+ 10/10/2006 - Version 0.47  chkproc.c: bug fixes, use of getpriority(),
+                            Enye LKM detected. chkrootkit: crontab
+                            test, Enye LKM and Lupper.Worm detected,
+                            minor bug fixes.
+ 12/17/2007 - Version 0.48  new tests: common SSH brute force
+                            scanners, suspicious PHP files.  Enhanced
+                            tests: login, netstat, top, backdoor.
+                            Minor bug fixes.
+ 09/30/2009 - Version 0.49  new tests: Mac OS X OSX.RSPlug.A.  Enhanced
+                            tests: suspicious sniffer logs, suspicious
+                            PHP files, shell history file anomalies.
+                            Bug fixes in chkdirs.c, chkproc.c and
+                            chkutmp.c.
+
+ -------------- Thx for using chkrootkit ----------------

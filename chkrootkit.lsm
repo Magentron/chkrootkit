@@ -1,0 +1,14 @@
+Begin3
+Title:          Chkrootkit
+Version:        0.49
+Entered-date:   Thu Jul 30 10:40:29 BRT 2009
+Description:    locally checks for signs of a rootkit
+Keywords:       rootkit check vulnerability unix LKM Ramen Lion Worn Adore Worm
+Author:         Nelson Murilo <nelson@pangeia.com.br>
+Maintained-by:  Nelson Murilo, Klaus Steding-Jessen <jessen@cert.br>
+Primary-site:   http://www.chkrootkit.org
+Alternate-site: ftp://ftp.pangeia.com.br/pub/seg/pac/
+Original-site:
+Platform:       Linux, FreeBSD, OpenBSD, NetBSD, Sun/Solaris, HPUX, BSDI, TRU64, Mac OS X
+Copying-policy: AMS
+End
