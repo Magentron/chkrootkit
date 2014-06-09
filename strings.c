@@ -15,6 +15,9 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <stdlib.h>
+#ifdef __FreeBSD__
+#include <string.h> 
+#endif
 
 #define MAXFILESIZE (4*1024*1024)
 

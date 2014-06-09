@@ -19,8 +19,11 @@
    Nelson Murilo, nelson@pangeia.com.br
 */
 
-
+#if __FreeBSD__ > 9 
+int main () { return 0; } 
+#else
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <utmp.h>
@@ -92,5 +95,6 @@ int main(int argc, char*argv[]) {
 	close(filehandle);
 	if (del_counter)
 	   printit(del_counter, start_time, act_time);
-        exit(t_del+del_counter);
+        exit((int) t_del+del_counter);
 }
+#endif

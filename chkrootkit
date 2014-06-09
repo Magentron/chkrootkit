@@ -1,13 +1,13 @@
 #! /bin/sh
 # -*- Shell-script -*-
 
-# $Id: chkrootkit, v 0.49a 2013/09/13
-CHKROOTKIT_VERSION='0.49a'
+# $Id: chkrootkit, v 0.50 2014/05/25
+CHKROOTKIT_VERSION='0.50'
 
 # Authors: Nelson Murilo <nelson@pangeia.com.br> (main author) and
 #          Klaus Steding-Jessen <jessen@cert.br>
 #
-# (c)1997-2009 Nelson Murilo, Pangeia Informatica, AMS Foundation and others.
+# (c)1997-2014 Nelson Murilo, Pangeia Informatica, AMS Foundation and others.
 # All rights reserved
 
 ### workaround for some Bourne shell implementations
@@ -20,6 +20,9 @@ unalias dirname > /dev/null 2>&1
 # Workaround for recent GNU coreutils
 _POSIX2_VERSION=199209
 export _POSIX2_VERSION
+
+KALLSYMS="/proc/kallsyms" 
+[ -f /proc/ksysm ] && KALLSYMS="/proc/$KALLSYMS" 
 
 # Native commands
 TROJAN="amd basename biff chfn chsh cron crontab date du dirname echo egrep \
@@ -107,7 +110,7 @@ slapper (){
    fi
    for i in ${SLAPPER_FILES}; do
       if [ -f ${i} ]; then
-	 file_port=$file_port $i
+	 file_port="$file_port $i" 
          STATUS=1
       fi
    done
@@ -306,7 +309,7 @@ lkm ()
       fi
 
       if [ "${EXPERT}" = "t" ]; then
-         [ -r /proc/ksyms ] &&  ${egrep} -i "adore|sebek" < /proc/ksyms 2>/dev/null
+         [ -r /proc/$KALLSYMS ] &&  ${egrep} -i "adore|sebek" < /proc/$KALLSYMS 2>/dev/null
          [ -d /proc/knark ] &&  ${ls} -la /proc/knark 2> /dev/null
          PV=`$ps -V 2>/dev/null| $cut -d " " -f 3 |${awk} -F . '{ print $1 "." $2 $3 }' | ${awk} '{ if ($0 > 3.19) print 3; else if ($0 < 2.015) print 1; else print 2 }'`
          [ "$PV" = "" ] &&  PV=2
@@ -316,14 +319,14 @@ lkm ()
       fi
 
       ### adore LKM
-      [ -r /proc/ksyms ] && \
-      if `${egrep} -i adore < /proc/ksyms >/dev/null 2>&1`; then
+      [ -r /proc/$KALLSYMS ] && \
+      if `${egrep} -i adore < /proc/$KALLSYMS >/dev/null 2>&1`; then
          echo "Warning: Adore LKM installed"
       fi
 
       ### sebek LKM (Adore based)
-      [ -r /proc/ksyms ] && \
-      if `${egrep} -i sebek < /proc/ksyms >/dev/null 2>&1`; then
+      [ -r /proc/$KALLSYMS ] && \
+      if `${egrep} -i sebek < /proc/$KALLSYMS >/dev/null 2>&1`; then
          echo "Warning: Sebek LKM installed"
       fi
 
@@ -527,8 +530,7 @@ ${ROOTDIR}usr/include/syslogs.h"
 
       ## Suckit rootkit
       expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} HOME"
-      expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} FUCK"
-      #expertmode_output "cat ${ROOTDIR}proc/1/maps | ${egrep} init."
+      expertmode_output "cat ${ROOTDIR}proc/1/maps | ${egrep} init."
       expertmode_output "cat ${ROOTDIR}dev/.golf"
 
       ## Volc rootkit
@@ -578,6 +580,9 @@ ${ROOTDIR}usr/sbin/initcheck ${ROOTDIR}usr/sbin/ldb"
       done
       ## ENYE-LKM
       expertmode_output "${ls} -l ${ROOTDIR}etc/.enyeOCULTAR.ko"
+
+      ## SSJD Operation Windigo  (Linux/Ebury) 
+      expertmode_output "${ssh} -G 2>&1  | grep -e illegal -e unknow" 
 
       ## Common SSH-SCANNERS
       expertmode_output "${find} ${ROOTDIR}/tmp ${ROOTDIR}/var/tmp ${findargs} -name vuln.txt -o -name ssh-scan -o -name pscan2"
@@ -981,10 +986,8 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    ### Suckit
    if [ -f ${ROOTDIR}sbin/init ]; then
       if [ "${QUIET}" != "t" ];then printn "Searching for Suckit rootkit... "; fi
-      if [ ${SYSTEM} != "HP-UX" ] && ( ${strings} ${ROOTDIR}sbin/init | ${egrep} HOME  || \
-          ${strings} ${ROOTDIR}sbin/init | ${egrep} FUCK \
-	      #|| cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." \
-		  ) >/dev/null 2>&1
+      if [ ${SYSTEM} != "HP-UX" ] && ( ${strings} ${ROOTDIR}sbin/init | ${egrep} 'HOME='   || \
+	      cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." ) >/dev/null 2>&1
         then
         echo "Warning: ${ROOTDIR}sbin/init INFECTED"
       else
@@ -1121,11 +1124,60 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    ## Common SSH-SCANNERS
    if [ "${QUIET}" != "t" ]; then
       printn "Searching for common ssh-scanners default files... "; fi
-      files="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -name vuln.txt -o -name ssh-scan -o -name pscan2 2> /dev/null`"
+   files="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -name vuln.txt -o -name ssh-scan -o -name pscan2 2> /dev/null`"
    if [ "${files}" = "" ]; then
       if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
    else
      echo "${files}"
+   fi
+
+   ## SSJD Operation Windigo  (Linux/Ebury) 
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for Linux/Ebury - Operation Windigo ssh... "; fi
+   if $ssh -G 2>&1 | grep -e illegal -e unknow > /dev/null; then 
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   else
+         echo "Possible Linux/Ebury - Operation Windigo installetd" 
+   fi  
+
+   ## Linux Rootkit 64 bits 
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for 64-bit Linux Rootkit ... "; fi
+   if ${egrep} module_init ${ROOTDIR}etc/rc.local >/dev/null 2>&1 || \
+      ${ls} ${ROOTDIR}/usr/local/hide >/dev/null 2>&1; then
+      echo "Possible 64-bit Linux Rootkit"
+   else
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   fi
+   
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for 64-bit Linux Rootkit modules... "; fi
+   files="`${find} ${ROOTDIR}/lib/modules ${findargs} -name module_init.ko 2 2> /dev/null`"
+   if [ "${files}" = "" ]; then
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   else
+     echo "${files}"
+   fi    
+
+
+
+   ###
+   ### Suspect PHP files
+   ###
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for suspect PHP files... "; fi
+      files="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -name '*.php' 2> /dev/null`"
+if [ `echo abc | head -n 1` = "abc" ]; then
+      fileshead="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -type f -exec head -n 1 {} \; | $egrep '#!.*php' 2> /dev/null`"
+else
+      fileshead="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -type f -exec head -1 {} \; | grep '#!.*php' 2> /dev/null`"
+fi
+   if [ "${files}" = "" -a "${fileshead}" = "" ]; then
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   else
+     echo
+     echo "${files}"
+     echo "${fileshead}"
    fi
 
    ###
@@ -1193,7 +1245,7 @@ getCMD() {
    for i in ${ROOTDIR}${RUNNING} ${ROOTDIR}usr/sbin/${1} `loc ${1} ${1} $pth`
    do
       CMD="${i}"
-      if [ -r "${i}" ] && [ "${i}" != "${ROOTDIR}" ];
+      if [ -r "${i}" ]
         then
         return 0
       fi
@@ -1358,8 +1410,9 @@ chk_inetd () {
     STATUS=${NOT_INFECTED}
     getCMD 'inetd'
 
-    if [ ${?} -ne 0 ]; then
-       return ${NOT_FOUND}
+    if [ ! -r ${CMD} -o ${CMD} = '/' ]
+    then
+       return ${NOT_TESTED}
     fi
 
     if [ "${EXPERT}" = "t" ]; then
@@ -1759,7 +1812,7 @@ chk_dirname () {
     then
         STATUS=${INFECTED}
     fi
-    if ${ls} -l ${CMD} | ${egrep} "^...s" > /dev/null 2>&1
+    if ${ls} -l ${MD} | ${egrep} "^...s" > /dev/null 2>&1
     then
         STATUS=${INFECTED}
     fi
@@ -2493,12 +2546,11 @@ chk_telnetd () {
     return ${STATUS}
 }
 
-printn ()
-{
+printn () {
     if `${echo} "a\c" | ${egrep} c >/dev/null 2>&1` ; then
-        ${echo} -n "$1"
+        ${echo} -n "$1" 
     else
-        ${echo} "${1}\c"
+        ${echo} "${1}\c"  
     fi
 }
 
@@ -2568,6 +2620,7 @@ ls
 netstat
 ps
 sed
+ssh
 strings
 uname
 "

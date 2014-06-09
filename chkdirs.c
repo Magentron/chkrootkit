@@ -62,6 +62,8 @@ void usage ()
 char *make_pathname (char *path, char *dir, char **buffer)
 {
   int plen, pathname_len, bufsize, offs;
+  
+  bufsize = 0; 
 
   plen = strlen(path);
   pathname_len = plen + strlen(dir) + 2;

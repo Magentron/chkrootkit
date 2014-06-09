@@ -3,7 +3,7 @@
 # (C) 1997-2007 Nelson Murilo, Pangeia Informatica, AMS Foundation and others.
 #
 
-CC       = gcc
+CC       = cc
 CFLAGS	 = -DHAVE_LASTLOG_H
 STATIC   = -static
 

@@ -1,7 +1,7 @@
 Begin3
 Title:          Chkrootkit
-Version:        0.49a
-Entered-date:   Fri Sep 13 14:47:48 CET 2013
+Version:        0.50
+Entered-date:   Thu May 25 10:40:29 BRT 2014
 Description:    locally checks for signs of a rootkit
 Keywords:       rootkit check vulnerability unix LKM Ramen Lion Worn Adore Worm
 Author:         Nelson Murilo <nelson@pangeia.com.br>

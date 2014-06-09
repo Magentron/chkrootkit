@@ -25,6 +25,7 @@
    09/19/01 - Another Segfault in some systems fixed, Thanks to Andreas Tirok
    06/26/02 - Fix problem with maximum uid number - Thanks to Gerard van Wageningen
    07/02/02 - Minor fixes - Nelson Murilo, nelson@pangeia.com.br
+   05/05/14 - Minor fixes - Klaus Steding-jessen 
 */
 
 #if defined(SOLARIS2) || defined(__linux__)
@@ -32,7 +33,9 @@
 #else
 #undef HAVE_LASTLOG_H
 #endif
-
+#if __FreeBSD__ > 9
+int main () { return 0; }
+#else
 #include <stdio.h>
 #ifdef __linux__
 #include <stdlib.h>
@@ -52,11 +55,12 @@
 #include <fcntl.h>
 #endif
 
-#ifdef __FreeBSD__
+#ifdef __FreeBSD__ 
 #define WTMP_FILENAME "/var/log/wtmp"
 #define LASTLOG_FILENAME "/var/log/lastlog"
 #endif
 #ifdef __OpenBSD__
+#include <stdlib.h> 
 #define WTMP_FILENAME "/var/log/wtmp"
 #define LASTLOG_FILENAME "/var/log/lastlog"
 #endif
@@ -289,3 +293,4 @@ int getslot(struct s_localpwd *localpwd, uid_t uid)
         }
         return -1;
 }
+#endif
