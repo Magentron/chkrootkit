@@ -1,4 +1,4 @@
-                         chkrootkit V. 0.50
+                         chkrootkit V. 0.50a
 
           Nelson Murilo <nelson@pangeia.com.br> (main author)
             Klaus Steding-Jessen <jessen@cert.br> (co-author)
@@ -356,9 +356,10 @@
                             PHP files, shell history file anomalies.
                             Bug fixes in chkdirs.c, chkproc.c and
                             chkutmp.c.
-
  04/30/2014 - Version 0.50 new tests: linuxrootkit-AMD-64-sound 
                            Operation Windigo ssh backdoor detection 
+ 10/28/2014 - Version 0.50a fix SucKIT false positive
+
 			   Minor bug fixes
 
  -------------- Thx for using chkrootkit ----------------

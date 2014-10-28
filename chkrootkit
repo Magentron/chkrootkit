@@ -1,8 +1,8 @@
 #! /bin/sh
 # -*- Shell-script -*-
 
-# $Id: chkrootkit, v 0.50 2014/05/25
-CHKROOTKIT_VERSION='0.50'
+# $Id: chkrootkit, v 0.50a 2014/10/28
+CHKROOTKIT_VERSION='0.50a'
 
 # Authors: Nelson Murilo <nelson@pangeia.com.br> (main author) and
 #          Klaus Steding-Jessen <jessen@cert.br>
@@ -530,7 +530,8 @@ ${ROOTDIR}usr/include/syslogs.h"
 
       ## Suckit rootkit
       expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} HOME"
-      expertmode_output "cat ${ROOTDIR}proc/1/maps | ${egrep} init."
+      expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} FUCK"
+      #expertmode_output "cat ${ROOTDIR}proc/1/maps | ${egrep} init."
       expertmode_output "cat ${ROOTDIR}dev/.golf"
 
       ## Volc rootkit
@@ -987,7 +988,9 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    if [ -f ${ROOTDIR}sbin/init ]; then
       if [ "${QUIET}" != "t" ];then printn "Searching for Suckit rootkit... "; fi
       if [ ${SYSTEM} != "HP-UX" ] && ( ${strings} ${ROOTDIR}sbin/init | ${egrep} 'HOME='   || \
-	      cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." ) >/dev/null 2>&1
+           ${strings} ${ROOTDIR}sbin/init | ${egrep} FUCK \
+ 	      #cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." \
+ 		  ) >/dev/null 2>&1
         then
         echo "Warning: ${ROOTDIR}sbin/init INFECTED"
       else
