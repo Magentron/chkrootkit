@@ -1139,6 +1139,8 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
       printn "Searching for Linux/Ebury - Operation Windigo ssh... "; fi
    if $ssh -G 2>&1 | grep -e illegal -e unknow > /dev/null; then 
       if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   elif $ssh -G 2>&1 | grep usage > /dev/null; then
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
    else
          echo "Possible Linux/Ebury - Operation Windigo installetd" 
    fi  
