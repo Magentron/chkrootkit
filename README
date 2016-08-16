@@ -1,4 +1,4 @@
-                         chkrootkit V. 0.50a
+                         chkrootkit V. 0.50b
 
           Nelson Murilo <nelson@pangeia.com.br> (main author)
             Klaus Steding-Jessen <jessen@cert.br> (co-author)
@@ -359,6 +359,7 @@
  04/30/2014 - Version 0.50 new tests: linuxrootkit-AMD-64-sound 
                            Operation Windigo ssh backdoor detection 
  10/28/2014 - Version 0.50a fix SucKIT false positive
+ 08/16/2016 - Version 0.50b fix for openssh without -G support
 
 			   Minor bug fixes
 
