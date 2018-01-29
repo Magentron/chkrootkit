@@ -1,4 +1,4 @@
-                         chkrootkit V. 0.50b
+                      chkrootkit V. 0.52-github1
 
           Nelson Murilo <nelson@pangeia.com.br> (main author)
             Klaus Steding-Jessen <jessen@cert.br> (co-author)
@@ -356,11 +356,23 @@
                             PHP files, shell history file anomalies.
                             Bug fixes in chkdirs.c, chkproc.c and
                             chkutmp.c.
+
  04/30/2014 - Version 0.50 new tests: linuxrootkit-AMD-64-sound 
                            Operation Windigo ssh backdoor detection 
+			   Minor bug fixes
+
  10/28/2014 - Version 0.50a fix SucKIT false positive
  08/16/2016 - Version 0.50b fix for openssh without -G support
 
-			   Minor bug fixes
+ 13/10/2016 - Version 0.51 Mumblehard backdoor/botnet detection 
+			   Linux.Xor.DDoS Malware
+                           Malicious TinyDNS detection 
+                           Backdoors.Linux.Mokes.a detection 
+			   Minor bug fixes 
+
+ 13/03/2017 - Version 0.52 Linux.Proxy.10 detection 
+              strings.c & chkutmp.c bug fixes
+
+ 29/01/2018 - Version 0.52-github1 merged from source
 
  -------------- Thx for using chkrootkit ----------------
