@@ -1,13 +1,13 @@
 #! /bin/sh
 # -*- Shell-script -*-
 
-# $Id: chkrootkit, v 0.50b 2016/08/16
-CHKROOTKIT_VERSION='0.50b'
+# $Id: chkrootkit, v 0.52 2017/03/13
+CHKROOTKIT_VERSION='0.52' 
 
 # Authors: Nelson Murilo <nelson@pangeia.com.br> (main author) and
 #          Klaus Steding-Jessen <jessen@cert.br>
 #
-# (c)1997-2014 Nelson Murilo, Pangeia Informatica, AMS Foundation and others.
+# (c)1997-2017 Nelson Murilo, Pangeia Informatica, AMS Foundation and others.
 # All rights reserved
 
 ### workaround for some Bourne shell implementations
@@ -68,13 +68,17 @@ w55808 (){
 }
 
 OSX_RSPLUG (){
+       if [ ${SYSTEM} != "Darwin" ]; then 
+          echo "not tested" 
+          return 
+       fi
        SAVEIFS=$IFS
        IFS=';'
        STATUS=0
        OSX_RSPLUG_FILES='/Library/Internet Plug-Ins/QuickTime.xpt;/Library/Internet Plug-Ins/plugins.settings'
-       #echo checking ${OSX_RSPLUG_FILES}
+#       echo checking ${OSX_RSPLUG_FILES}
        for i in ${OSX_RSPLUG_FILES} ; do
-               #echo searching for "${i}"
+               echo searching for "${i}"
                if [ -e "${i}" ] ; then
                        STATUS=1
                fi
@@ -290,7 +294,7 @@ PORT="114|145|465|511|600|1008|1524|1999|1978|2881|3049|3133|3879|4000|4369|5190
    done
    if [ "${PI}" != "" ]
    then
-      echo "INFECTED (PORTS: $PI)"
+      echo "INFECTED PORTS: ($PI)"
    else
       if [ "${QUIET}" != "t" ]; then echo "not infected"; fi
    fi
@@ -529,9 +533,8 @@ ${ROOTDIR}usr/include/syslogs.h"
       ${egrep} "\.hk" ${ROOTDIR}etc/rc.d/init.d/network 2>/dev/null
 
       ## Suckit rootkit
-      expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} HOME"
-      expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} FUCK"
-      #expertmode_output "cat ${ROOTDIR}proc/1/maps | ${egrep} init."
+      expertmode_output "${strings} ${ROOTDIR}sbin/init | ${egrep} '\.sniffer'" 
+      expertmode_output "cat ${ROOTDIR}proc/1/maps | ${egrep} init."
       expertmode_output "cat ${ROOTDIR}dev/.golf"
 
       ## Volc rootkit
@@ -583,7 +586,23 @@ ${ROOTDIR}usr/sbin/initcheck ${ROOTDIR}usr/sbin/ldb"
       expertmode_output "${ls} -l ${ROOTDIR}etc/.enyeOCULTAR.ko"
 
       ## SSJD Operation Windigo  (Linux/Ebury) 
-      expertmode_output "${ssh} -G 2>&1  | grep -e illegal -e unknow" 
+      if $ssh -V 2>&1 | egrep "OpenSSH_[1-5]\.|OpenSSH_6\.[0-7]" >/dev/null; then
+         expertmode_output "${ssh} -G 2>&1  | grep -e illegal -e unknow" 
+      fi
+
+      ## Mumblehard backdoor/botnet 
+      expertmode_output "cat ${ROOTDIR}/var/spool/cron/crontabs | egrep var/tmp"
+
+      ## Backdoors.Linux.Mokes.a
+      expertmode_output "${ls} -l ${ROOTDIR}tmp/ss0-[0-]9*" 
+      expertmode_output "${ls} -l ${ROOTDIR}tmp/kk0-[0-]9*" 
+
+      ## Malicious TinyDNS 
+      expertmode_output "${ls} -l "${ROOTDIR}home/ ./root/""
+
+      ## Linux/Xor.DDoS 
+      exportmode_output "${find} ${ROOTDIR}tmp -executable -type f" 
+      exportmode_output "${find} ${ROOTDIR}etc/cron.hourly"
 
       ## Common SSH-SCANNERS
       expertmode_output "${find} ${ROOTDIR}/tmp ${ROOTDIR}/var/tmp ${findargs} -name vuln.txt -o -name ssh-scan -o -name pscan2"
@@ -987,10 +1006,8 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    ### Suckit
    if [ -f ${ROOTDIR}sbin/init ]; then
       if [ "${QUIET}" != "t" ];then printn "Searching for Suckit rootkit... "; fi
-      if [ ${SYSTEM} != "HP-UX" ] && ( ${strings} ${ROOTDIR}sbin/init | ${egrep} 'HOME='   || \
-           ${strings} ${ROOTDIR}sbin/init | ${egrep} FUCK \
- 	      #cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." \
- 		  ) >/dev/null 2>&1
+      if [ ${SYSTEM} != "HP-UX" ] && ( ${strings} ${ROOTDIR}sbin/init | ${egrep} '\.sniffer'   || \
+	      cat ${ROOTDIR}/proc/1/maps | ${egrep} "init." ) >/dev/null 2>&1
         then
         echo "Warning: ${ROOTDIR}sbin/init INFECTED"
       else
@@ -1137,14 +1154,15 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    ## SSJD Operation Windigo  (Linux/Ebury) 
    if [ "${QUIET}" != "t" ]; then
       printn "Searching for Linux/Ebury - Operation Windigo ssh... "; fi
-   if $ssh -G 2>&1 | grep -e illegal -e unknow > /dev/null; then 
-      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
-   elif $ssh -G 2>&1 | grep usage > /dev/null; then
-      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   if $ssh -V 2>&1 | egrep "OpenSSH_[1-5]\.|OpenSSH_6\.[-0-7]" >/dev/null; then
+      if $ssh -G 2>&1 | grep -e illegal -e unknow > /dev/null; then 
+         if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+      else
+         echo "Possible Linux/Ebury - Operation Windigo installed" 
+      fi
    else
-         echo "Possible Linux/Ebury - Operation Windigo installetd" 
+      echo "not tested"
    fi  
-
    ## Linux Rootkit 64 bits 
    if [ "${QUIET}" != "t" ]; then
       printn "Searching for 64-bit Linux Rootkit ... "; fi
@@ -1162,10 +1180,67 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
       if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
    else
      echo "${files}"
-   fi    
+   fi  
+  
+   ## Mumblehard backdoor/botnet
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for Mumblehard Linux ... "; fi
+   if [ -e ${ROOTDIR}var/spool/cron/crontabs ]; then 
+      cat ${ROOTDIR}var/spool/cron/crontabs/* 2>/dev/null | egrep "var/tmp"  
+      if [ $? -ne 0 ] ; then 
+         if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+      else 
+         echo "Possible Mumblehard backdoor installed"
+      fi
+   else 
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   fi
+   
+   ## Backdoor.Linux.Mokes.a 
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for Backdoor.Linux.Mokes.a ... "; fi
+   files="`${find} ${ROOTDIR}tmp/ ${findargs} -name "ss0-[0-9]*" -o -name "kk-[0-9]*"   2> /dev/null`"
+   if [ "${files}" = "" ]; then
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   else
+     echo "${files}"
+   fi  
 
+   ## Malicious TinyDNS 
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for Malicious TinyDNS ... "; fi
+   files="`${find} "${ROOTDIR}home/ ./" 2> /dev/null`"
+   if [ "${files}" = "" ]; then 
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   else
+      echo "INFECTED: Possible Malicious TinyDNS installed"
+   fi      
 
+   ## Linux/Xor.DDoS 
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for Linux.Xor.DDoS ... "; fi
+   files="`${find} ${ROOTDIR}tmp/ ${findargs} -executable -type f 2> /dev/null`"
+   if [ "${files}" = "" ]; then
+      files="`${ls} ${ROOTDIR}etc/cron.hourly/udev.sh 2> /dev/null`"
+      if [ "${files}" = "" ]; then 
+         if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+      else
+         echo "INFECTED: Possible Malicious Linux.Xor.DDoS installed"
+      fi
+   else
+     echo "INFECTED: Possible Malicious Linux.Xor.DDoS installed"
+     echo "${files}"
+   fi  
 
+   ## Linux.Proxy 1.0 
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for Linux.Proxy.1.0 ... "; fi
+
+   if ${egrep} -i mother ${ROOTDIR}etc/passwd >/dev/null 2>&1 ; then 
+      echo "INFECTED: Possible Malicious Linux.Proxy.10 installed"
+   else
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   fi
    ###
    ### Suspect PHP files
    ###
@@ -1817,7 +1892,7 @@ chk_dirname () {
     then
         STATUS=${INFECTED}
     fi
-    if ${ls} -l ${MD} | ${egrep} "^...s" > /dev/null 2>&1
+    if ${ls} -l ${CMD} | ${egrep} "^...s" > /dev/null 2>&1
     then
         STATUS=${INFECTED}
     fi

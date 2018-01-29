@@ -24,6 +24,7 @@
  *  Changelog:
  *   Ighighi X - Improved speed via break command - 2005/03/27
  *   Some overflow fixes by Michael Schwendt - 2009/07/21
+ *   Fixed false warning  - 2017/02/18 - George Ogata
  *
  */
 
@@ -82,7 +83,7 @@ int fetchps(struct ps_line *psl_p)
     char *s, *d;
     struct ps_line *curp = &psl_p[0];
     struct ps_line *endp = &psl_p[MAXBUF-1];
-    int i, x;
+    int i, x, line_length;
 
     i = 0;
     if ((ps_fp = (popen(cmd[PS_CMD], "r"))) != NULL) {
@@ -115,6 +116,12 @@ int fetchps(struct ps_line *psl_p)
 		    ;
 		i++;
 		curp++;
+                /* if we didn't read the line, skip the rest */ 
+                line_length = strlen(line); 
+                while (!(line_length == 0 || line[line_length -1] == '\n')) { 
+                   fgets(line, MAXREAD, ps_fp);
+                   line_length = strlen(line); 
+                } 
 	    }
 	}
 	pclose(ps_fp);

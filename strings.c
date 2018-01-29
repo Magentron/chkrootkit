@@ -15,7 +15,10 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <stdlib.h>
-#ifdef __FreeBSD__
+#ifdef __FreeBSD__ 
+#include <string.h> 
+#endif
+#ifdef __linux__ 
 #include <string.h> 
 #endif
 

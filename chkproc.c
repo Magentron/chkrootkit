@@ -50,6 +50,9 @@
 
   2006/01/11 - Fix signal 25 on parisc linux and return of kill() -
                Thanks to Lantz Moore
+
+  2014/07/16 -  MAX_PROCESSES now is 999999 - 
+		Thanks to Nico Koenrades
 */
 
 #if !defined(__linux__) && !defined(__FreeBSD__) && !defined(__sun)
@@ -84,7 +87,7 @@ int main (){ return 0; }
 #else
 #define FIRST_PROCESS 1
 #endif
-#define MAX_PROCESSES 99999
+#define MAX_PROCESSES 999999 
 #define MAX_BUF 1024
 
 #if !defined (SIGXFSZ)
@@ -277,7 +280,8 @@ int main(int argc, char **argv)
    retps = retdir = 0;
    for (i = FIRST_PROCESS; i <= MAX_PROCESSES; i++)
    {
-      snprintf(&buf[6], 6, "%d", i);
+      // snprintf(&buf[6], 6, "%d", i);
+       snprintf(&buf[6], 8, "%d", i);
       if (!chdir(buf))
       {
          if (!dirproc[i] && !psproc[i])
