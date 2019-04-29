@@ -53,6 +53,9 @@
 
   2014/07/16 -  MAX_PROCESSES now is 999999 - 
 		Thanks to Nico Koenrades
+
+  2017/04/13 -  MAX_PROCESSES now is 4194384 if linux64 
+		Thanks to DS Store
 */
 
 #if !defined(__linux__) && !defined(__FreeBSD__) && !defined(__sun)
@@ -88,6 +91,10 @@ int main (){ return 0; }
 #define FIRST_PROCESS 1
 #endif
 #define MAX_PROCESSES 999999 
+#if defined (__x86_64) > 0 
+#undef MAX_PROCESSES
+#define MAX_PROCESSES 4194384
+#endif
 #define MAX_BUF 1024
 
 #if !defined (SIGXFSZ)
@@ -235,7 +242,7 @@ int main(int argc, char **argv)
           p++;
       while (isspace(*p)) /* Skip spaces */
           p++;
-/*  printf(">>%s<<\n", p);  /* -- DEBUG */
+/*  printf(">>PS %s<<\n", p);  /* -- DEBUG */
       ret = atol(p);
       if ( ret < 0 || ret > MAX_PROCESSES )
       {

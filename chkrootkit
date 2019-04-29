@@ -1,19 +1,20 @@
 #! /bin/sh
 # -*- Shell-script -*-
 
-# $Id: chkrootkit, v 0.52 2017/03/13
-CHKROOTKIT_VERSION='0.52' 
+# $Id: chkrootkit, v 0.53 2019/02/11
+CHKROOTKIT_VERSION='0.53' 
 
 # Authors: Nelson Murilo <nelson@pangeia.com.br> (main author) and
 #          Klaus Steding-Jessen <jessen@cert.br>
 #
-# (c)1997-2017 Nelson Murilo, Pangeia Informatica, AMS Foundation and others.
+# (c)1997-2019 Nelson Murilo, Pangeia Informatica, AMS Foundation and others.
 # All rights reserved
 
 ### workaround for some Bourne shell implementations
 unalias login > /dev/null 2>&1
 unalias ls > /dev/null 2>&1
 unalias netstat > /dev/null 2>&1
+unalias ss > /dev/null 2>&1
 unalias ps > /dev/null 2>&1
 unalias dirname > /dev/null 2>&1
 
@@ -69,7 +70,7 @@ w55808 (){
 
 OSX_RSPLUG (){
        if [ ${SYSTEM} != "Darwin" ]; then 
-          echo "not tested" 
+        if [ "${QUIET}" != "t" ]; then echo "not tested"; fi
           return 
        fi
        SAVEIFS=$IFS
@@ -102,7 +103,9 @@ slapper (){
    SLAPPER_FILES="$SLAPPER_FILES ${ROOTDIR}tmp/.unlock ${ROOTDIR}tmp/httpd \
    ${ROOTDIR}tmp/update ${ROOTDIR}tmp/.cinik ${ROOTDIR}tmp/.b"
    SLAPPER_PORT="0.0:2002 |0.0:4156 |0.0:1978 |0.0:1812 |0.0:2015 "
-   OPT=-an
+   _chk_netstat_or_ss; 
+   OPT="-an" 
+   [ "${netstat}" = "ss" ] && OPT="-a" 
    STATUS=0
    file_port=
 
@@ -129,7 +132,9 @@ slapper (){
 scalper (){
    SCALPER_FILES="${ROOTDIR}tmp/.uua ${ROOTDIR}tmp/.a"
    SCALPER_PORT=2001
-   OPT=-an
+   OPT="-an" 
+   _chk_netstat_or_ss; 
+   [ "$netstat" = "ss" ] && OPT="-a" 
    STATUS=0
 
    if ${netstat} "${OPT}" | ${egrep} "0.0:${SCALPER_PORT} "> /dev/null 2>&1; then
@@ -168,7 +173,7 @@ asp (){
         return ${NOT_INFECTED}
     fi
     if ${strings} -a ${CMD} | ${egrep} "${ASP_LABEL}" >/dev/null 2>&1; then
-       echo "INFECTED"
+       # echo "INFECTED"
        STATUS=${INFECTED}
     else
         if [ "${QUIET}" != "t" ]; then echo "not infected"; fi
@@ -200,7 +205,7 @@ sniffer () {
 }
 
 chkutmp() {
-    if [ ! -x ./chkutmp ]; then
+    if [ ! -x ./chkutmp -o ${mode} = "pm" ]; then
       echo "not tested: can't exec ./chkutmp"
       return ${NOT_TESTED}
     fi
@@ -208,7 +213,6 @@ chkutmp() {
     then
       if [ "${QUIET}" != "t" ]; then echo "chkutmp: nothing deleted"; fi
     fi
-
 }
 
 z2 () {
@@ -226,11 +230,11 @@ z2 () {
     fi
 
     if [ "${EXPERT}" = "t" ]; then
-        expertmode_output "./chklastlog -f ${WTMP} -l ${LASTLOG}"
+        expertmode_output "./chklastlog -f ${ROOTDIR}${WTMP} -l ${ROOTDIR}${LASTLOG}"
         return 5
     fi
 
-    if ./chklastlog -f ${WTMP} -l ${LASTLOG}
+    if ./chklastlog -f ${ROOTDIR}${WTMP} -l ${ROOTDIR}${LASTLOG}
     then
       if [ "${QUIET}" != "t" ]; then echo "chklastlog: nothing deleted"; fi
     fi
@@ -274,7 +278,9 @@ wted () {
 }
 bindshell () {
 PORT="114|145|465|511|600|1008|1524|1999|1978|2881|3049|3133|3879|4000|4369|5190|5665|6667|10008|12321|23132|27374|29364|30999|31336|31337|37998|45454|47017|47889|60001|7222"
-   OPT="-an"
+   OPT="-an" 
+   _chk_netstat_or_ss; 
+   [ "$netstat" = "ss" ] && OPT="-a"  
    PI=""
    if [ "${ROOTDIR}" != "/" ]; then
      echo "not tested"
@@ -305,9 +311,9 @@ lkm ()
     prog=""
     if [  \( "${SYSTEM}" = "Linux"  -o \( "${SYSTEM}" = "FreeBSD" -a \
        `echo ${V} | ${awk} '{ if ($1 > 4.3 || $1 < 6.0) print 1; else print 0 }'` -eq 1 \) \) -a "${ROOTDIR}" = "/" ]; then
-      [  -x ./chkproc -a "`find /proc | wc -l`" -gt 1 ] && prog="./chkproc"
+       [  -x ./chkproc -a "`find /proc 2>/dev/null| wc -l`" -gt 1 ] && prog="./chkproc"
       [  -x ./chkdirs ] && prog="$prog ./chkdirs"
-      if [ "$prog" = "" ]; then
+      if [ "$prog" = "" -o ${mode} = "pm" ]; then
          echo "not tested: can't exec $prog"
          return ${NOT_TESTED}
       fi
@@ -586,6 +592,7 @@ ${ROOTDIR}usr/sbin/initcheck ${ROOTDIR}usr/sbin/ldb"
       expertmode_output "${ls} -l ${ROOTDIR}etc/.enyeOCULTAR.ko"
 
       ## SSJD Operation Windigo  (Linux/Ebury) 
+      ssh=`which ssh` 
       if $ssh -V 2>&1 | egrep "OpenSSH_[1-5]\.|OpenSSH_6\.[0-7]" >/dev/null; then
          expertmode_output "${ssh} -G 2>&1  | grep -e illegal -e unknow" 
       fi
@@ -601,8 +608,17 @@ ${ROOTDIR}usr/sbin/initcheck ${ROOTDIR}usr/sbin/ldb"
       expertmode_output "${ls} -l "${ROOTDIR}home/ ./root/""
 
       ## Linux/Xor.DDoS 
-      exportmode_output "${find} ${ROOTDIR}tmp -executable -type f" 
-      exportmode_output "${find} ${ROOTDIR}etc/cron.hourly"
+      expertmode_output "${find} ${ROOTDIR}tmp -executable -type f" 
+      expertmode_output "${find} ${ROOTDIR}etc/cron.hourly"
+
+      ## CrossRAT 
+      expertmode_output "${find} ${ROOTDIR}usr/var ${findargs} -name mediamgrs.jar"
+
+      ## Hidden Cobra  (IBM AIX) 
+      expertmode_output "${find} ${ROOTDIR}tmp/.ICE-unix ${findargs} -name *.so"
+      
+      ## Rocke Monero Miner 
+      expertmode_output "${find} ${ROOTDIR}etc ${findargs} -name ld.so.pre -o -name xig" 
 
       ## Common SSH-SCANNERS
       expertmode_output "${find} ${ROOTDIR}/tmp ${ROOTDIR}/var/tmp ${findargs} -name vuln.txt -o -name ssh-scan -o -name pscan2"
@@ -1152,17 +1168,27 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    fi
 
    ## SSJD Operation Windigo  (Linux/Ebury) 
+   LIBKEY="lib/x86_64-linux-gnu/libkeyutils.so.1" 
    if [ "${QUIET}" != "t" ]; then
       printn "Searching for Linux/Ebury - Operation Windigo ssh... "; fi
    if $ssh -V 2>&1 | egrep "OpenSSH_[1-5]\.|OpenSSH_6\.[-0-7]" >/dev/null; then
       if $ssh -G 2>&1 | grep -e illegal -e unknow > /dev/null; then 
-         if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+         if [ "${QUIET}" != "t" ]; then echo "nothing found "; fi
       else
-         echo "Possible Linux/Ebury - Operation Windigo installed" 
+         echo "Possible Linux/Ebury 1.4 - Operation Windigo installed" 
       fi
+   fi
+   if [ ! -f "${ROOTDIR}${LIBKEY}" ]; then 
+      if [ "${QUIET}" != "t" ]; then 
+         echo "not tested"; fi
    else
-      echo "not tested"
-   fi  
+      if ${strings} -a ${ROOTDIR}${LIBKEY} | egrep "libns2|libns5|libpw3|libpw5|libsbr|libslr" >/dev/null; then 
+         echo "Possible Linux/Ebury 1.6 - Operation Windigo installed"
+      else
+         if [ "${QUIET}" != "t" ]; then echo "nothing found "; fi
+      fi
+   fi    
+   ##
    ## Linux Rootkit 64 bits 
    if [ "${QUIET}" != "t" ]; then
       printn "Searching for 64-bit Linux Rootkit ... "; fi
@@ -1222,7 +1248,8 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    files="`${find} ${ROOTDIR}tmp/ ${findargs} -executable -type f 2> /dev/null`"
    if [ "${files}" = "" ]; then
       files="`${ls} ${ROOTDIR}etc/cron.hourly/udev.sh 2> /dev/null`"
-      if [ "${files}" = "" ]; then 
+      files="$files $($ls ${ROOTDIR}etc/cron.hourly/gcc.sh 2> /dev/null)" 
+      if [ "${files}" = " " ]; then 
          if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
       else
          echo "INFECTED: Possible Malicious Linux.Xor.DDoS installed"
@@ -1241,16 +1268,43 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    else
       if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
    fi
+
+   # Linux/CrossRAT 
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for CrossRAT ... "; fi
+   if ${ls} ${ROOTDIR}usr/var/mediamgrs.jar 2>/dev/null; then 
+      echo "INFECTED: Possible Malicious CrossRAT installed"
+   else
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   fi
+   ## Hidden Cobra (IBM AIX) 
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for Hidden Cobra ... "; fi
+   if ${ls} "${ROOTDIR}tmp/.ICE-unix/m*.so" ${ROOTDIR}tmp/.ICE-unix/engine.so 2>/dev/null; then 
+      echo "INFECTED: Possible Malicious Hidden Cobra installed"
+   else
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   fi  
+
+   ### Rocke Monero Miner
+   if [ "${QUIET}" != "t" ]; then
+      printn "Searching for Rocke Miner ... "; fi
+   if [ -f "${ROOTDIR}etc/ld.so.pre" -o -f "${ROOTDIR}etc/xig" ] ; then 
+      echo "INFECTED: Possible Malicious Rocke Miner installed"
+   else
+      if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
+   fi  
+
    ###
-   ### Suspect PHP files
+   ### Suspects PHP files
    ###
    if [ "${QUIET}" != "t" ]; then
       printn "Searching for suspect PHP files... "; fi
       files="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -name '*.php' 2> /dev/null`"
-if [ `echo abc | head -n 1` = "abc" ]; then
-      fileshead="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -type f -exec head -n 1 {} \; | $egrep '#!.*php' 2> /dev/null`"
+if [ `echo abc | _head -1` = "abc" ]; then
+      fileshead="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -type f -exec head -n 1 {} \; | ${egrep} '^#!.*php' 2> /dev/null`"
 else
-      fileshead="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -type f -exec head -1 {} \; | grep '#!.*php' 2> /dev/null`"
+      fileshead="`${find} ${ROOTDIR}tmp ${ROOTDIR}var/tmp ${findargs} -type f -exec head -1 {} \; | ${egrep} '^#!.*php' 2> /dev/null`"
 fi
    if [ "${files}" = "" -a "${fileshead}" = "" ]; then
       if [ "${QUIET}" != "t" ]; then echo "nothing found"; fi
@@ -1317,7 +1371,6 @@ loc () {
 }
 
 getCMD() {
-
    RUNNING=`${ps} ${ps_cmd} | ${egrep} "${L_REGEXP}${1}${R_REGEXP}" | \
             ${egrep} -v grep | ${egrep} -v chkrootkit | _head -1 | \
             ${awk} '{ print $5 }'`
@@ -2474,7 +2527,9 @@ chk_rshd () {
 chk_tcpdump () {
    STATUS=${NOT_INFECTED}
    TCPDUMP_I_L="212.146.0.34:1963";
-   OPT=-an
+   _chk_netstat_or_ss; 
+   OPT="-an" 
+   [ "${netstat}" = "ss" ] && OPT="-a"  
    if ${netstat} "${OPT}" | ${egrep} "${TCPDUMP_I_L}"> /dev/null 2>&1; then
       STATUS=${INFECTED}
    fi
@@ -2484,7 +2539,7 @@ chk_tcpdump () {
 chk_tcpd () {
     STATUS=${NOT_INFECTED}
     TCPD_INFECTED_LABEL="p1r0c4|hack|/dev/xmx|/dev/hdn0|/dev/xdta|/dev/tux"
-
+    CMD=""
     [ -r ${ROOTDIR}etc/inetd.conf ] &&
     CMD=`${egrep} '^[^#].*tcpd' ${ROOTDIR}etc/inetd.conf | _head -1 | \
          ${awk} '{ print $6 }'`
@@ -2644,14 +2699,17 @@ R_REGEXP='([^A-Za-z0-9_]|$)'
 
 ### default ROOTDIR is "/"
 ROOTDIR='/'
+mode="rt" 
 
 while :
 do
         case $1 in
-        -r)     shift
-                ROOTDIR=$1;;
-
-        -p)     shift
+        -r)    [ -z "$2" ] && exit 1; 
+               shift
+               mode="pm" 
+               ROOTDIR=$1;;
+        -p)    [ -z "$2" ] && exit 1; 
+                shift
                 CHKRKPATH=$1;;
 
         -d)     DEBUG=t;;
@@ -2697,10 +2755,8 @@ find
 head
 id
 ls
-netstat
 ps
 sed
-ssh
 strings
 uname
 "
@@ -2776,7 +2832,7 @@ else
 fi
 
 if [ `${id} | ${cut} -d= -f2 | ${cut} -d\( -f1` -ne 0 ]; then
-   echo "$0 need root privileges"
+   echo "$0 needs root privileges"
    exit 1
 fi
 
@@ -2825,6 +2881,15 @@ if [ "${QUIET}" != "t" ]; then
     echo "ROOTDIR is \`${ROOTDIR}'"
 fi
 
+#
+# NETSTAT OR SS
+#
+_chk_netstat_or_ss() 
+{
+    netstat="netstat"  
+    CMD=`loc ss ss $pth`
+    [ ${?} -eq 0 ] && netstat="ss"  
+}
 
 for cmd in ${LIST}
 do

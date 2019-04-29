@@ -1,4 +1,4 @@
-                         chkrootkit V. 0.52
+                         chkrootkit V. 0.53
 
           Nelson Murilo <nelson@pangeia.com.br> (main author)
             Klaus Steding-Jessen <jessen@cert.br> (co-author)
@@ -361,7 +361,7 @@
                            Operation Windigo ssh backdoor detection 
 			   Minor bug fixes
 
- 13/10/2016 - Version 0.51 Mumblehard backdoor/botnet detection 
+ 10/13/2016 - Version 0.51 Mumblehard backdoor/botnet detection 
 			   Linux.Xor.DDoS Malware
                            Malicious TinyDNS detection 
                            Backdoors.Linux.Mokes.a detection 
@@ -370,4 +370,9 @@
  13/03/2017 - Version 0.52 Linux.Proxy.10 detection 
               strings.c & chkutmp.c bug fixes
 
+
+ 01/25/2019 - Version 0.53 Rocke Monero Miner detection
+                          Added ss support
+	                  ifconfig.c bug fixes 
+                          Minor bug fixes 
  -------------- Thx for using chkrootkit ----------------
