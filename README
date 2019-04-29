@@ -1,4 +1,4 @@
-                      chkrootkit V. 0.52-github1
+                      chkrootkit V. 0.53-github1
 
           Nelson Murilo <nelson@pangeia.com.br> (main author)
             Klaus Steding-Jessen <jessen@cert.br> (co-author)
@@ -364,15 +364,22 @@
  10/28/2014 - Version 0.50a fix SucKIT false positive
  08/16/2016 - Version 0.50b fix for openssh without -G support
 
- 13/10/2016 - Version 0.51 Mumblehard backdoor/botnet detection 
+ 10/13/2016 - Version 0.51 Mumblehard backdoor/botnet detection 
 			   Linux.Xor.DDoS Malware
                            Malicious TinyDNS detection 
                            Backdoors.Linux.Mokes.a detection 
 			   Minor bug fixes 
 
- 13/03/2017 - Version 0.52 Linux.Proxy.10 detection 
+ 03/13/2017 - Version 0.52 Linux.Proxy.10 detection 
               strings.c & chkutmp.c bug fixes
 
- 29/01/2018 - Version 0.52-github1 merged from source
+ 01/29/2018 - Version 0.52-github1 merged from source
+
+ 01/25/2019 - Version 0.53 Rocke Monero Miner detection
+                          Added ss support
+	                  ifconfig.c bug fixes 
+                          Minor bug fixes 
+
+ 04/29/2018 - Version 0.53-github1 merged from source
 
  -------------- Thx for using chkrootkit ----------------

@@ -16,6 +16,7 @@
                  Andre Gustavo <gustavo@anita.visualnet.com.br>
                  Port for OpenBSD
          	 Nelson Murilo, <nelson@pangeia.com.br>
+                 Fix wrong output (patched by Sean MacLennan) 
 
    Author:	Nelson Murilo, <nelson@pangeia.com.br>
   		Copyright 1997-2003 (C) Pangeia Informatica
@@ -263,18 +264,19 @@ static void ife_print(struct interface *ptr)
         if (has_packet)
         {
             struct packet_info *p;
+	    int first_time = 1; 
             printf(" PF_PACKET(");
-            p = proc_net_packet;
-            if (p)
+            for (p = proc_net_packet; p; p = p->next)
             {
-                printf("%s", p->cmd);
-
-                for (p = p->next; p; p = p->next)
-                {
-                    if (p->index == ptr->index)
-                    {
-                        printf(", %s", p->cmd);
-                    }
+               if (p->index == ptr->index)
+               {
+                  if (first_time) 
+                  { 
+                     first_time = 0; 
+                     printf("%s", p->cmd); 
+                  }
+                  else 
+                     printf(", %s", p->cmd);
                 }
             }
             printf(")");
