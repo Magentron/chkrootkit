@@ -1,8 +1,8 @@
 #! /bin/sh
 # -*- Shell-script -*-
 
-# $Id: chkrootkit, v 0.53-github1 2019/04/29
-CHKROOTKIT_VERSION='0.53-github1' 
+# $Id: chkrootkit, v 0.53-github2 2019/04/29
+CHKROOTKIT_VERSION='0.53-github2' 
 
 # Authors: Nelson Murilo <nelson@pangeia.com.br> (main author) and
 #          Klaus Steding-Jessen <jessen@cert.br>

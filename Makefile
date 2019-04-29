@@ -20,7 +20,7 @@ STATIC   = -static
 ### Mac OS X
 ###
 # If you have Mac OS X, uncomment the next line
-#STATIC =
+#STATIC = -B static
 
 ###
 ### FreeBSD or OpenBSD 2.x

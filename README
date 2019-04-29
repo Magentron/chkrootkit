@@ -1,4 +1,4 @@
-                      chkrootkit V. 0.53-github1
+                      chkrootkit V. 0.53-github2
 
           Nelson Murilo <nelson@pangeia.com.br> (main author)
             Klaus Steding-Jessen <jessen@cert.br> (co-author)
@@ -380,6 +380,9 @@
 	                  ifconfig.c bug fixes 
                           Minor bug fixes 
 
- 04/29/2018 - Version 0.53-github1 merged from source
+ 04/29/2019 - Version 0.53-github1 merged from source
+
+ 04/29/2018 - Version 0.53-github2 enable compiling on MacOS set STATIC
+                                   to "-B static"
 
  -------------- Thx for using chkrootkit ----------------
