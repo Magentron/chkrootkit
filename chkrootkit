@@ -1173,12 +1173,10 @@ ${find} ${ROOTDIR}usr/sbin -name in.slogind`
    LIBKEY="lib/x86_64-linux-gnu/libkeyutils.so.1" 
    if [ "${QUIET}" != "t" ]; then
       printn "Searching for Linux/Ebury - Operation Windigo ssh... "; fi
-   if $ssh -G 2>&1 | grep -v usage > /dev/null; then
-      if $ssh -G 2>&1 | grep -e illegal -e unknow > /dev/null; then 
+   if $ssh -G 2>&1 | grep -e illegal -e unknow -e usage > /dev/null; then
          if [ "${QUIET}" != "t" ]; then echo "nothing found "; fi
-      else
+   else
          echo "Possible Linux/Ebury 1.4 - Operation Windigo installed" 
-      fi
    fi
    if [ ! -f "${ROOTDIR}${LIBKEY}" ]; then 
       if [ "${QUIET}" != "t" ]; then 
