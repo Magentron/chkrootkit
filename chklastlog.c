@@ -93,7 +93,7 @@ void free_results(struct s_localpwd *);
 uid_t *localgetpwnam(struct s_localpwd *, char *);
 int getslot(struct s_localpwd *, uid_t);
 
-#define MAX_ID 99999
+#define MAX_ID 99999u
 
 int main(int argc, char*argv[]) {
 	int		fh_wtmp;
@@ -167,7 +167,7 @@ int main(int argc, char*argv[]) {
             {
                 if (*uid > MAX_ID)
                 {
-                   fprintf(stderr, "MAX_ID is %ld and current uid is %ld, please check\n\r", MAX_ID, *uid );
+                   fprintf(stderr, "MAX_ID is %u and current uid is %u, please check\n\r", MAX_ID, *uid );
                    exit (1);
 
                 }
