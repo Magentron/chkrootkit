@@ -2721,7 +2721,7 @@ do
         -q)     QUIET=t;;
 
         -V)     echo >&2 "chkrootkit version ${CHKROOTKIT_VERSION}"
-                exit 1;;
+                exit 0;;
 
         -l)     echo >&2 "$0: tests: ${TOOLS} ${TROJAN}"
                 exit 1;;
